@@ -1,4 +1,4 @@
-var db = require('./sequelize');
+var db = require('../db/sequelizedb');
 var Sequelize = require('sequelize');
 var bcrypt = require('bcrypt-nodejs');
 
@@ -38,12 +38,13 @@ var User = db.define('user', {
 
 User.findByEmail = function(email) {
   return User.findOne({where: {email}});
-}
+};
 
 User.beforeCreate((user, options) => {
-  return pHash(user.password, null, null).then(hash => {
-    user.password = hash;
-  });
+  return pHash(user.password, null, null)
+    .then((hash) => {
+      user.password = hash;
+    });
 });
 
 module.exports = User;

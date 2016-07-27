@@ -1,5 +1,5 @@
 let server = require('./server');
-let db = require('./models/config');
+let db = require('./db/config');
 
 db.sync().then(() => {
   server.listen(process.env.PORT || 3000, () => {

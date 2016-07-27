@@ -1,19 +1,9 @@
-let express = require('express');
 let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
 let FacebookStrategy = require('passport-facebook').Strategy;
 
-let User = require('./models/User');
-let OAuth = require('./models/OAuth');
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-passport.deserializeUser((id, done) => {
-  User.findById(id).then(user => {
-    done(null, user);
-  });
-});
+let User = require('../models/User');
+let OAuth = require('../models/OAuth');
 
 passport.use(new LocalStrategy({
   usernameField: 'email'
@@ -72,43 +62,12 @@ passport.use(new FacebookStrategy({
     });
 }));
 
-let routes = express.Router();
-
-routes.post('/auth/local',
-  passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login.html'
-  })
-);
-
-routes.post('/auth/local/register', (req, res) => {
-  User.findByEmail(req.body.email).then(user => {
-    if (user) {
-      res.redirect('/register.html?error');
-    } else {
-      User.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password
-      }).then(user => {
-        res.redirect('/login.html?success');
-      });
-    }
-  });
+passport.serializeUser((user, done) => {
+  done(null, user.id);
 });
-
-routes.get('/auth/facebook', passport.authenticate('facebook'));
-
-routes.get('/auth/facebook/return',
-  passport.authenticate('facebook', {
-      successRedirect: '/',
-      failureRedirect: '/login.html'
-  })
-);
-
-routes.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login.html');
+passport.deserializeUser((id, done) => {
+  User.findById(id).then(user => {
+    done(null, user);
   });
 });
 
@@ -122,6 +81,5 @@ function isAuth(req, res, next) {
 
 module.exports = {
   passport,
-  routes,
   isAuth
 };
