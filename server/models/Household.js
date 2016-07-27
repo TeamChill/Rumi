@@ -1,4 +1,4 @@
-var db = require('./sequelize.js');
+var db = require('../db/sequelizedb');
 var Sequelize = require('sequelize');
 
 var Household = db.define('household', {
@@ -7,6 +7,5 @@ var Household = db.define('household', {
     allowNull: false
   }
 });
-
 
 module.exports = Household;

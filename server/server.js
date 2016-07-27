@@ -1,27 +1,18 @@
+let http = require('http');
 let express = require('express');
-let session = require('express-session');
-let bodyParser = require('body-parser');
+let app = express();
+let server = http.Server(app);
 
-let decorate = require('./alphadeltaninerniner.service');
-let auth = require('./auth');
-
-checkForEnvironmentVariables(['FB_ID', 'FB_SECRET', 'SESSION_SECRET']);
-
-let sessionMiddleware = session({
+let sessionMW = require('express-session')({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false
 });
-// middleware configuration
-let app = express();
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(sessionMiddleware);
-app.use(auth.passport.initialize());
-app.use(auth.passport.session());
-app.use(auth.routes);
-app.use(express.static(__dirname + '/../public'));
-app.use(auth.isAuth, express.static(__dirname + '/../dist'));
-let server = decorate(app, sessionMiddleware);
+
+checkForEnvironmentVariables(['FB_ID', 'FB_SECRET', 'SESSION_SECRET']);
+
+require('./config/middleware')(app, express, sessionMW);
+require('./config/socketRouter')(server, sessionMW);
 
 module.exports = server;
 

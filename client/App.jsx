@@ -75,8 +75,6 @@ class App extends React.Component {
         completedTasks: cs
       });
     }.bind(this));
-
-
   }
 
   render() {

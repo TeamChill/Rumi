@@ -1,8 +1,7 @@
-let http = require('http');
 let socketIo = require('socket.io');
-let Task = require('./models/Task');
-let User = require('./models/User');
-let Completed = require('./models/Completed');
+let Task = require('../models/taskModel');
+let Completed = require('../models/Completed');
+let User = require('../models/User');
 
 // Socket is the one in particular who is sending us stuff
 // IO.emit is sending to everyone
@@ -13,13 +12,13 @@ let Completed = require('./models/Completed');
  * @param  {ExpressApp} app An express web app (e.g. let app = express())
  * @return {HttpServer}     An http server with alphadeltaninerniner superpowers
  */
-function decorate(app, session) {
-  let server = http.Server(app);
+module.exports = function decorate(server, session) {
   let io = socketIo(server);
   io.use((socket, next) => {
     session(socket.request, socket.request.res, next);
   });
   io.on('connection', socket => {
+
     if (!socket.request.session.passport) {
       return socket.emit('rumi error', {message: 'Please reauthenticate'});
     }
@@ -39,7 +38,6 @@ function decorate(app, session) {
       console.log('disconnected');
     });
   });
-  return server;
 
   /**
    * Creates a new Task in the database and
@@ -111,7 +109,7 @@ function decorate(app, session) {
       }).then(completeds => {
         socket.emit('sending completeds', completeds);
       });
-    }
+    };
   }
 
   /**
@@ -121,6 +119,4 @@ function decorate(app, session) {
   function notYetImplemented(action) {
     console.warn(`[WARN] ${action} is not yet implemented!`);
   }
-}
-
-module.exports = decorate;
+};

@@ -1,4 +1,4 @@
-var db = require('./sequelize.js');
+var db = require('../db/sequelizedb');
 
 var Completed = db.define('completed', {});
 
