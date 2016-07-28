@@ -4,6 +4,7 @@ let routes = require('./router');
 
 module.exports = function(app, express, sessionMW) {
   app.use(bodyParser.urlencoded({extended: true}));
+  app.use(bodyParser.json());
   app.use(sessionMW);
   app.use(auth.passport.initialize());
   app.use(auth.passport.session());
