@@ -1,4 +1,6 @@
 let socketIo = require('socket.io');
+let jwt = require('jsonwebtoken');
+// let socketioJwt = require('socketio-jwt');
 let Task = require('../models/taskModel');
 let Completed = require('../models/Completed');
 let User = require('../models/User');
@@ -14,15 +16,35 @@ let User = require('../models/User');
  */
 module.exports = function decorate(server, session) {
   let io = socketIo(server);
+
   // io.use((socket, next) => {
   //   session(socket.request, socket.request.res, next);
   // });
+
+  io.use((socket, next) => {
+    var token = socket.handshake.query.token;
+    jwt.verify(token, 'helloguys', function(err, decoded) {      
+      if (err) {
+        return res.json({ success: false, message: 'Failed to authenticate token.' });    
+      } else {
+        // if everything is good, save to request for use in other routes
+        socket.decoded = decoded;  
+        next();
+      }
+    });
+  });
+
   io.on('connection', socket => {
 
     // if (!socket.request.session.passport) {
     //   return socket.emit('rumi error', {message: 'Please reauthenticate'});
     // }
-    console.log('connected');
+    console.log('connected :', socket.decoded);
+
+    if (!socket.decoded) {
+      return socket.emit('rumi error', {message: 'Please reauthenticate'});
+    }
+
 
     socket.on('create task', createTask);
     // socket.on('read task', readTask);
