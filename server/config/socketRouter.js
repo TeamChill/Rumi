@@ -17,45 +17,53 @@ let User = require('../models/User');
 module.exports = function decorate(server, session) {
   let io = socketIo(server);
 
-  // io.use((socket, next) => {
-  //   session(socket.request, socket.request.res, next);
-  // });
+  io.use((socket, next) => {
+
+    if (socket.request.res) {
+      session(socket.request, socket.request.res, next);  
+    } else {
+      next();
+    }
+  });
 
   io.use((socket, next) => {
-    var token = socket.handshake.query.token;
-    jwt.verify(token, 'helloguys', function(err, decoded) {      
-      if (err) {
-        return res.json({ success: false, message: 'Failed to authenticate token.' });    
-      } else {
-        // if everything is good, save to request for use in other routes
-        socket.decoded = decoded;  
-        next();
-      }
-    });
+    if (socket.handshake.query.token) {
+      var token = socket.handshake.query.token;
+      jwt.verify(token, 'helloguys', function(err, decoded) {      
+        if (err) {
+          return res.json({ success: false, message: 'Failed to authenticate token.' });    
+        } else {
+          // if everything is good, save to request for use in other routes
+          socket.decoded = decoded;  
+          next();
+        }
+      });
+    } else {
+      next();
+    }
   });
 
   io.on('connection', socket => {
 
-    // if (!socket.request.session.passport) {
-    //   return socket.emit('rumi error', {message: 'Please reauthenticate'});
-    // }
-    console.log('connected :', socket.decoded);
-
-    if (!socket.decoded) {
+    if (!socket.request.session && !socket.decoded) {
       return socket.emit('rumi error', {message: 'Please reauthenticate'});
     }
+    console.log('connected :', socket.decoded || socket.request.session);
 
-
-    socket.on('create task', createTask);
     // socket.on('read task', readTask);
+    socket.on('create task', createTask);
     socket.on('update task', updateTask);
     socket.on('archive task', archiveTask);
     socket.on('unarchive task', notYetImplemented.bind(null, 'unarchive task'));
-    // socket.on('complete task', completeTask(socket.request.session.passport.user));
-
     socket.on('get all tasks', getAllTasks(socket));
     socket.on('get completeds', getCompleteds(socket));
 
+    if (socket.request.session) {
+      socket.on('complete task', completeTask(socket.request.session.passport));
+    } else {
+      socket.on('complete task', completeTask(socket.decoded));
+    }
+    
     socket.on('disconnect', () => {
       console.log('disconnected');
     });
