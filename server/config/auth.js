@@ -6,9 +6,10 @@ let User = require('../models/User');
 let OAuth = require('../models/OAuth');
 
 passport.use(new LocalStrategy({
-  usernameField: 'email'
-}, function(email, password, done) {
-  User.findByEmail(email).then(user => {
+  usernameField: 'username'
+}, function(name, password, done) {
+  User.findOne({where:{name: name}}).then(user => {
+    console.log('auth user', user);
     if (!user) {
       console.error('user does not exist in the database');
       done(null, false);
