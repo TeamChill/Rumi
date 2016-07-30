@@ -18,29 +18,21 @@ module.exports = function decorate(server, session) {
   let io = socketIo(server);
 
   io.use((socket, next) => {
-
     if (socket.request.res) {
       session(socket.request, socket.request.res, next);  
-    } else {
-      next();
-    }
-  });
-
-  io.use((socket, next) => {
-    if (socket.handshake.query.token) {
-      var token = socket.handshake.query.token;
-      jwt.verify(token, 'helloguys', function(err, decoded) {      
-        if (err) {
-          return res.json({ success: false, message: 'Failed to authenticate token.' });    
-        } else {
-          // if everything is good, save to request for use in other routes
-          socket.decoded = decoded;  
-          next();
-        }
-      });
-    } else {
-      next();
-    }
+    } else if (socket.handshake.query.token) {
+        var token = socket.handshake.query.token;
+        jwt.verify(token, 'helloguys', function(err, decoded) {      
+          if (err) {
+            console.log(err);   
+          } else {
+            socket.decoded = decoded;  
+            next();
+          }
+        });
+      } else {
+        next();
+      }
   });
 
   io.on('connection', socket => {
@@ -65,6 +57,7 @@ module.exports = function decorate(server, session) {
     }
     
     socket.on('disconnect', () => {
+      socket.disconnect();
       console.log('disconnected');
     });
   });
