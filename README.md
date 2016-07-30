@@ -17,3 +17,6 @@
   - docker ps
 - start the server!
  
+
+- to destroy docker containers 
+  - docker rm -f $(docker ps -aq)

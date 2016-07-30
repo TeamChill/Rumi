@@ -61,7 +61,7 @@ module.exports = function decorate(server, session) {
     if (socket.request.session) {
       socket.on('complete task', completeTask(socket.request.session.passport));
     } else {
-      socket.on('complete task', completeTask(socket.decoded));
+      socket.on('complete task', completeTask(socket.decoded.id));
     }
     
     socket.on('disconnect', () => {
@@ -76,6 +76,7 @@ module.exports = function decorate(server, session) {
    */
   function createTask(task) {
     // Verify user permissions
+    console.log('add task socket emitted')
     return Task.create(task).then(task => {
       io.emit('create task', task);
     });
@@ -116,7 +117,8 @@ module.exports = function decorate(server, session) {
     return id => {
       return Task.findById(id).then(task => task.complete(userId)).then(completed => {
         completed.reload({ include: [ User, Task ] }).then(completed => {
-          io.emit('complete task', completed);
+          console.log('this is completed',completed);
+          io.emit('completed task', completed);
         });
       });
     };

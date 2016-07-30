@@ -12,7 +12,7 @@ module.exports = function(express, passport) {
   );
 
   routes.post('/auth/local/register', (req, res) => {
-    User.findByEmail(req.body.email).then(user => {
+    User.findOne({where: {name: req.body.name}}).then(user => {
       if (user) {
         res.redirect('/register.html?error');
       } else {
@@ -43,7 +43,7 @@ module.exports = function(express, passport) {
   });
 
   routes.post('/iosAuth/local/signin', function(req, res) {
-    User.findByEmail(req.body.email).then(user => {
+    User.findOne({where: {name: req.body.name}}).then(user => {
       if (!user) {
         console.error('user does not exist in the database');
         res.json({message: 'User does not exist'});
@@ -67,7 +67,7 @@ module.exports = function(express, passport) {
   });
 
   routes.post('/iosAuth/local/signup', (req, res) => {
-    User.findByEmail(req.body.email).then(user => {
+    User.findOne({where: {name: req.body.name}}).then(user => {
       if (user) {
         console.log('Username is taken');
         res.json({message: 'Username is taken...'});
