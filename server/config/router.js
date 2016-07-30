@@ -52,7 +52,6 @@ module.exports = function(express, passport) {
           if (verified) {
             var tokenUser = {id: user.id, email: user.email, name: user.name};
             var token = jwt.sign(tokenUser, 'helloguys', {expiresIn: 1000});
-            console.log(token);
             res.status(201).send({
               id_token: token,
               name: user.name,
