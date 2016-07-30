@@ -1,6 +1,5 @@
 let socketIo = require('socket.io');
 let jwt = require('jsonwebtoken');
-// let socketioJwt = require('socketio-jwt');
 let Task = require('../models/taskModel');
 let Completed = require('../models/Completed');
 let User = require('../models/User');
